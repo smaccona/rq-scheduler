@@ -38,7 +38,9 @@ Schedule a job involves doing two different things:
 Scheduling a Job
 ----------------
 
-There are two ways you can schedule a job. The first is using RQ Scheduler's ``enqueue_at``::
+There are two ways you can schedule a job. The first is using RQ Scheduler's ``enqueue_at``
+
+.. code-block:: python
 
     from redis import Redis
     from rq_scheduler import Scheduler
@@ -59,7 +61,9 @@ There are two ways you can schedule a job. The first is using RQ Scheduler's ``e
 The second way is using ``enqueue_in``. Instead of taking a ``datetime`` object,
 this method expects a ``timedelta`` and schedules the job to run at
 X seconds/minutes/hours/days/weeks later. For example, if we want to monitor how
-popular a tweet is a few times during the course of the day, we could do something like::
+popular a tweet is a few times during the course of the day, we could do something like
+
+.. code-block:: python
 
     from datetime import timedelta
 
@@ -78,7 +82,9 @@ As of version 0.3, `RQ Scheduler`_ also supports creating periodic and repeated 
 You can do this via the ``schedule`` method. Note that this feature needs
 `RQ`_ >= 0.3.1.
 
-This is how you do it::
+This is how you do it
+
+.. code-block:: python
 
     scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
@@ -101,7 +107,9 @@ As of version 0.6.0, `RQ Scheduler`_ also supports creating Cron Jobs, which you
 repeated jobs to run periodically at fixed times, dates or intervals, for more info check
 https://en.wikipedia.org/wiki/Cron. You can do this via the ``cron`` method.
 
-This is how you do it::
+This is how you do it
+
+.. code-block:: python
 
     scheduler.cron(
         cron_string,                # A cron string (e.g. "0 0 * * 0")
@@ -117,7 +125,9 @@ Retrieving scheduled jobs
 -------------------------
 
 Sometimes you need to know which jobs have already been scheduled. You can get a
-list of enqueued jobs with the ``get_jobs`` method::
+list of enqueued jobs with the ``get_jobs`` method
+
+.. code-block:: python
 
     list_of_job_instances = scheduler.get_jobs()
 
@@ -131,7 +141,9 @@ or an integer denoting the number of seconds since epoch (1970-01-01 00:00:00).
 The second argument is a boolen that determines whether the scheduled execution
 time should be returned along with the job instances.
 
-Example::
+Example
+
+.. code-block:: python
 
     # get all jobs until 2012-11-30 10:00:00
     list_of_job_instances = scheduler.get_jobs(until=datetime(2012, 10, 30, 10))
@@ -149,7 +161,9 @@ Checking if a job is scheduled
 ------------------------------
 
 You can check whether a specific job instance or job id is scheduled for
-execution using the familiar python ``in`` operator::
+execution using the familiar python ``in`` operator
+
+.. code-block:: python
 
     if job_instance in scheduler:
         # Do something
@@ -161,9 +175,13 @@ execution using the familiar python ``in`` operator::
 Canceling a job
 ---------------
 
-To cancel a job, simply do:
+To cancel a job, simply pass a ``Job`` or a job id to ``scheduler.cancel``
+
+.. code-block:: python
 
     scheduler.cancel(job)
+    
+Note that this method returns ``None`` whether the specified job was found or not.
 
 ---------------------
 Running the scheduler
@@ -171,12 +189,16 @@ Running the scheduler
 
 `RQ Scheduler`_ comes with a script ``rqscheduler`` that runs a scheduler
 process that polls Redis once every minute and move scheduled jobs to the
-relevant queues when they need to be executed::
+relevant queues when they need to be executed
+
+.. code-block:: bash
 
     # This runs a scheduler process using the default Redis connection
     rqscheduler
 
-If you want to use a different Redis server you could also do::
+If you want to use a different Redis server you could also do
+
+.. code-block:: bash
 
     rqscheduler --host localhost --port 6379 --db 0
 
@@ -186,6 +208,8 @@ The script accepts these arguments:
 * ``-p`` or ``--port``: port to connect to
 * ``-d`` or ``--db``: Redis db to use
 * ``-P`` or ``--password``: password to connect to Redis
+* ``-b`` or ``--burst``: runs in burst mode (enqueue scheduled jobs whose execution time is in the past and quit)
+* ``-i INTERVAL`` or ``--interval INTERVAL``: How often the scheduler checks for new jobs to add to the queue (in seconds, can be floating-point for more precision).
 
 The arguments pull default values from environment variables with the
 same names but with a prefix of ``RQ_REDIS_``.
@@ -193,6 +217,13 @@ same names but with a prefix of ``RQ_REDIS_``.
 
 Changelog
 =========
+
+Version 0.6.1
+-------------
+* Added `scheduler.count()`. Thanks @smaccona!
+* `scheduler.get_jobs()` now supports pagination. Thanks @smaccona!
+* Better `ttl` and `result_ttl` defaults for jobs created by `scheduler.cron`. Thanks @csaba-stylight and @lechup!
+
 
 Version 0.6.0
 -------------
